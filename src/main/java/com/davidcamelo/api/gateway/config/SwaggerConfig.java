@@ -21,6 +21,7 @@ public class SwaggerConfig {
     public void updateSwaggerDocs() {
         var definitions = locator.getRouteDefinitions().collectList().block();
         var urls = new HashSet<AbstractSwaggerUiConfigProperties.SwaggerUrl>();
+        urls.add(new AbstractSwaggerUiConfigProperties.SwaggerUrl("", DEFAULT_API_DOCS_URL, null));
         assert definitions != null;
         definitions.stream()
                 .filter(routeDefinition -> (
@@ -30,7 +31,7 @@ public class SwaggerConfig {
                 )
                 .forEach(routeDefinition -> {
                     var name = routeDefinition.getId().substring(routeDefinition.getId().lastIndexOf("_") + 1).toLowerCase();
-                    var swaggerUrl = new AbstractSwaggerUiConfigProperties.SwaggerUrl(name, DEFAULT_API_DOCS_URL + "/" + name, null);
+                    var swaggerUrl = new AbstractSwaggerUiConfigProperties.SwaggerUrl(name, DEFAULT_API_DOCS_URL + "/" + name, name + "-service");
                     urls.add(swaggerUrl);
                 });
         swaggerUiConfigProperties.setUrls(urls);
