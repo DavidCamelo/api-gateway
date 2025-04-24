@@ -4,13 +4,20 @@ metadata:
   name: api-gateway
   labels:
     app: api-gateway
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
 spec:
   rules:
     - host: spring-boot.davidcamelo.com
       http:
         paths:
-          - backend:
+          - pathType: ImplementationSpecific
+            backend:
               service:
                 name: api-gateway
                 port:
-                  name: 8080
+                  number: 8080
+  tls:
+    - hosts:
+        - spring-boot.davidcamelo.com
+      secretName: api-gateway-ingress
