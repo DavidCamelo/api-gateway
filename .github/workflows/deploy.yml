@@ -37,6 +37,7 @@ jobs:
           docker buildx build \
           --platform ${{steps.prepare.outputs.docker_platform}} \
           --tag ${{steps.prepare.outputs.docker_image}}:$IMAGE_TAG \
+          --tag ${{steps.prepare.outputs.docker_image}}:${{github.sha}} \
           --push .
       - name: Kubernetes Config
         if: success()
@@ -53,3 +54,5 @@ jobs:
             kubernetes/deployment.yml
             kubernetes/service.yml
             kubernetes/ingress.yml
+          images: |
+            ${{steps.prepare.outputs.docker_image}}:${{github.sha}}
