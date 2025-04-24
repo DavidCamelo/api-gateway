@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Docker Image CI / Kubernetes Deployment CD
 
 on:
   push:
@@ -38,3 +38,19 @@ jobs:
           --platform ${{steps.prepare.outputs.docker_platform}} \
           --tag ${{steps.prepare.outputs.docker_image}}:$IMAGE_TAG \
           --push .
+      - name: Kubernetes Config
+        if: success()
+        uses: Azure/k8s-set-context@v4
+        with:
+          kubeconfig: ${{ secrets.KUBE_CONFIG  }}
+      - name: Kubernetes Deploy
+        if: success()
+        uses: Azure/k8s-deploy@v4
+        with:
+          action: deploy
+          namespace: spring-boot
+          skip-tls-verify: false
+          manifests: |
+            kubernetes/deployment.yml
+            kubernetes/service.yml
+            kubernetes/ingress.yml
