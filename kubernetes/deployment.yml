@@ -20,6 +20,11 @@ spec:
           ports:
             - containerPort: 8080
               protocol: TCP
+          resources:
+            limits:
+              memory: 256Mi
+            requests:
+              memory: 64Mi
           env:
             - name: JAVA_OPTS
               value: -Xms64m -Xmx256m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:InitiatingHeapOccupancyPercent=30 -XX:G1PeriodicGCInterval=5000
