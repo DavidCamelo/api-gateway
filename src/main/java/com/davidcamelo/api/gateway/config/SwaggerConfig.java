@@ -14,12 +14,12 @@ import static org.springdoc.core.utils.Constants.DEFAULT_API_DOCS_URL;
 @Configuration
 @RequiredArgsConstructor
 public class SwaggerConfig {
-    private final RouteDefinitionLocator locator;
+    private final RouteDefinitionLocator routeDefinitionLocator;
     private final SwaggerUiConfigProperties swaggerUiConfigProperties;
 
     @Scheduled(fixedDelay = 60_000)
     public void updateSwaggerDocs() {
-        var definitions = locator.getRouteDefinitions().collectList().block();
+        var definitions = routeDefinitionLocator.getRouteDefinitions().collectList().block();
         var urls = new HashSet<AbstractSwaggerUiConfigProperties.SwaggerUrl>();
         urls.add(new AbstractSwaggerUiConfigProperties.SwaggerUrl("", DEFAULT_API_DOCS_URL, null));
         assert definitions != null;
