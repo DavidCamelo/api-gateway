@@ -2,7 +2,8 @@ package com.davidcamelo.api.gateway.filter;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import org.springframework.beans.factory.annotation.Value;
+import com.davidcamelo.api.gateway.config.JWTProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
@@ -11,24 +12,35 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
+@Slf4j
 @Component
 public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFactory<AuthenticationGatewayFilterFactory.Config> {
+    private final JWTProperties jwtProperties;
 
-    @Value("${jwt.secret}")
-    private String secret;
+    private static final List<String> EXCLUDED_PATHS = List.of(
+            "/auth", "/actuator", "/info", "/swagger-ui", "/v3/api-docs"
+    );
 
-    public AuthenticationGatewayFilterFactory() {
+    private static final List<String> EXCLUDED_ORIGINS = List.of(
+            "http://localhost:6006", "http://localhost:8080",
+            "http://localhost:4173", "http://localhost:4174", "http://localhost:4175", "http://localhost:4176",
+            "http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176"
+    );
+
+    public AuthenticationGatewayFilterFactory(JWTProperties jwtProperties) {
         super(Config.class);
+        this.jwtProperties = jwtProperties;
     }
 
     @Override
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
             var request = exchange.getRequest();
-            if (request.getURI().getPath().startsWith("/auth")
-                    || request.getURI().getPath().startsWith("/actuator")
-                    || request.getURI().getPath().contains("/swagger-ui")
-                    || request.getURI().getPath().contains("/v3/api-docs")) {
+            if (EXCLUDED_PATHS.stream().anyMatch(path -> request.getURI().getPath().startsWith(path))
+                || EXCLUDED_ORIGINS.stream().anyMatch(origin -> request.getHeaders().getOrigin() != null && request.getHeaders().getOrigin().equals(origin))
+            ) {
                 return chain.filter(exchange);
             }
             if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
@@ -40,7 +52,7 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
             }
             var token = authHeader.substring(7);
             try {
-                var decodedJWT = JWT.require(Algorithm.HMAC256(secret))
+                var decodedJWT = JWT.require(Algorithm.HMAC256(jwtProperties.secret()))
                         .build()
                         .verify(token);
                 var subject = decodedJWT.getSubject();
@@ -57,6 +69,7 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
     }
 
     private Mono<Void> onError(ServerWebExchange exchange) {
+        log.error("Unauthorized request: {}", exchange.getRequest().getURI());
         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
         return exchange.getResponse().setComplete();
     }
