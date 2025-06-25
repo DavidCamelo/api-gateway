@@ -38,7 +38,7 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
             var request = exchange.getRequest();
-            if (EXCLUDED_PATHS.stream().anyMatch(path -> request.getURI().getPath().startsWith(path))
+            if (EXCLUDED_PATHS.stream().anyMatch(path -> request.getURI().getPath().contains(path))
                 || EXCLUDED_ORIGINS.stream().anyMatch(origin -> request.getHeaders().getOrigin() != null && request.getHeaders().getOrigin().equals(origin))
             ) {
                 return chain.filter(exchange);
