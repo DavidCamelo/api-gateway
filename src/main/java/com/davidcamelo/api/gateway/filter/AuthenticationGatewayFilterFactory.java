@@ -20,7 +20,7 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
     private final JWTProperties jwtProperties;
 
     private static final List<String> EXCLUDED_PATHS = List.of(
-            "/auth", "/actuator", "/info", "/swagger-ui", "/v3/api-docs"
+            "/auth/api/auth", "/actuator", "/info", "/swagger-ui", "/v3/api-docs"
     );
 
     private static final List<String> EXCLUDED_ORIGINS = List.of(
