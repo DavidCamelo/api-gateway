@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
@@ -38,8 +39,9 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
             var request = exchange.getRequest();
-            if (EXCLUDED_PATHS.stream().anyMatch(path -> request.getURI().getPath().contains(path))
-                || EXCLUDED_ORIGINS.stream().anyMatch(origin -> request.getHeaders().getOrigin() == null || (request.getHeaders().getOrigin() != null && request.getHeaders().getOrigin().equals(origin)))
+            if (request.getMethod().equals(HttpMethod.GET)
+                    || EXCLUDED_PATHS.stream().anyMatch(path -> request.getURI().getPath().contains(path))
+                    || EXCLUDED_ORIGINS.stream().anyMatch(origin -> request.getHeaders().getOrigin() == null || (request.getHeaders().getOrigin() != null && request.getHeaders().getOrigin().equals(origin)))
             ) {
                 return chain.filter(exchange);
             }
