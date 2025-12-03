@@ -45,7 +45,7 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
             ) {
                 return chain.filter(exchange);
             }
-            if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
+            if (!request.getHeaders().containsHeader(HttpHeaders.AUTHORIZATION)) {
                 return onError(exchange);
             }
             var authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);

@@ -25,7 +25,7 @@ public class SwaggerConfig {
         assert definitions != null;
         definitions.stream()
                 .filter(routeDefinition -> (
-                        routeDefinition.getId().startsWith("ReactiveCompositeDiscoveryClient")
+                        (routeDefinition.getId() != null && routeDefinition.getId().startsWith("ReactiveCompositeDiscoveryClient"))
                         && !routeDefinition.getId().endsWith("EUREKA-SERVER")
                         && !routeDefinition.getId().endsWith("API-GATEWAY")
                         && !routeDefinition.getId().endsWith("CONFIG-SERVER"))
